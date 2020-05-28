@@ -93,3 +93,5 @@ class MD5_plink:
         allele_hash = self.md5_gen(allele_string)
         return allele_hash
         
+hasher = MD5_plink('/data/CARD/PD/imputed_data/PLINK/PLINK_HARD.NEUROX_DBGAP','/data/LNG/KIM/Neuro+/test.sampleID')
+hasher.allele_string_gen()

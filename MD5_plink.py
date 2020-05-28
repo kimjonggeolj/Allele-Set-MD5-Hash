@@ -59,6 +59,7 @@ class MD5_plink():
         sampleID=pd.read_csv(input_name+".fam", sep="\s", header=None, names=["FID","IID","r1","r2","r3","r4"], usecols=["FID","IID"])
         sampleID=sampleID['FID']+"_"+sampleID['IID']
         # instead of "allele_list" it would be "hash" column instead in the final script
+        # NOTE: Maybe make another column with the missing SNPs instead of a printed warning???
         for i in sampleID:
             new_row={'sampleID':i, "allele_list":MD5_plink.allele_string_traw_gen(traw = "traw_temp.traw", sampleID = i)}
             df=df.append(new_row, ignore_index=True)

@@ -4,7 +4,7 @@ ForenSeq MD5 Hasher is a tool that generates a MD5 hash of selected genetic vari
 
 Quick-Start
 ---
-Import the class MD5_plink. Provide the class relevant attributes `geno_path` and `sampleID`, then use MD5_plink.allele_string_gen() to generate the a list of hash from a given list of participant IDs.
+Import the class MD5_plink. Provide the class relevant attributes `geno_path` and `sampleID`, where `geno_path` is the directory of the PLINK binary file and `sampleID` is the list or a string of participant ID(s) of interest. Use MD5_plink.allele_string_gen() to generate the a list of hash from a given list of participant IDs.
 
 ```
 test_sample = "FID_IID"

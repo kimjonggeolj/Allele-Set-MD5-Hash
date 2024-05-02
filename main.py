@@ -3,6 +3,7 @@ import numpy as np
 import math
 import os
 import argparse
+import json
 
 import MD5_plink
 import utils
@@ -130,9 +131,7 @@ def handle_main():
 
     hash_to_ids, hash_file = run_hashing(geno_path, out_path, allele_list)
 
-    with open(f'{out_path}_duplicates.txt', 'w') as f:
-        print(hash_to_ids, file=f)
-    f.close()
+    json.dump(hash_to_ids, open(f'{out_path}_duplicates.json', 'w'))
 
     print(f'duplicates contained in {out_path}_duplicates.txt')
     print(f'hashes are located in {hash_file}')

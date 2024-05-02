@@ -12,3 +12,35 @@ hasher = MD5_plink(geno_path='PLINK_geno', sampleID=test_sample)
 hash_example = hasher.allele_string_gen()
 hash_example
 ```
+
+UPDATE
+---
+Run from command line:
+- **`--bfile`**
+  - *Type*: `str`
+  - *Default*: `None`
+  - *Description*: path to input genotypes in plink1.9 files
+
+- **`--pfile`**
+  - *Type*: `str`
+  - *Default*: `None`
+  - *Description*: path to input genotypes in plink2.0 files
+
+- **`--default_snps`**
+  - *Type*: `bool`
+  - *Default*: `False`
+  - *Description*: use default GP2 perfect callrate snps as allele list
+
+- **`--out`** *(required)*
+  - *Type*: `str`
+  - *Default*: `None`
+  - *Description*: prefix for output files
+
+
+Example:
+```
+python3 main.py \
+    --bfile /path/to/input_genos \
+    --out /path/to/output \
+    --default_snps
+```

@@ -7,7 +7,7 @@ import utils
 random.seed(42)
 
 class MD5_plink:
-    def __init__(self, geno_path, out_path, allele_list='/data/GP2/projects/2024_01_SH_checksums/GP2_allcall_snps4.set'):
+    def __init__(self, geno_path, out_path, allele_list='GP2_allcall_snps.set'):
         self.geno_path = geno_path
         self.out_path = out_path
         self.allele_list = allele_list

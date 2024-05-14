@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import math
 import os
 import argparse
 import json
@@ -16,6 +14,7 @@ def hash_argparse():
     parser.add_argument('--bfile', type=str, nargs='?', default=None, const=None, help='Genotype: String file path to PLINK1.9 files')
     parser.add_argument('--pfile', type=str, nargs='?', default=None, const=None, help='Genotype: String file path to PLINK2.0 files')
     parser.add_argument('--default_snps', type=bool, nargs='?', default=False, const=True, help='Allele list used for GP2 genotypes')
+    parser.add_argument('--snp_list', type=str, nargs='?', default=None, const=None, help='Allele list: String file path')
     parser.add_argument('--out', type=str, nargs='?', default=None, const=None, help='Path prefix for output')
 
     args = parser.parse_args()
@@ -53,48 +52,13 @@ def run_hashing(geno_path, out_path, allele_list='GP2_allcall_snps3.set'):
     # would require to run through the raw_genotype generation twice
     # but necessary to ensure same hash for duplicates with NaNs
 
-    # check num samples
-    # if big, split into chunks
-    samples = pd.read_csv(f'{geno_path}.psam', sep='\s+', header=None, names=['FID', 'IID', 'PAT', 'MAT', 'SEX', 'PHENO'])
-    if samples.shape[0] > 2500:
-        # number of chunks
-        n = math.ceil(samples.shape[0] / 2500)
-        samples_list = np.array_split(samples, n)
-        splits = list()
-        missings = list()
-        for i in range(n):
-            # split geno data into chunks
-            split = samples_list[i]
-            split[['FID', 'IID']].to_csv(f'{geno_path}_split{i+1}.txt', sep='\t', header=False, index=False)
-            plink_cmd = f'plink2 --pfile {geno_path} --keep {geno_path}_split{i+1}.txt --make-pgen psam-cols=fid,parents,sex,pheno1,phenos --out {geno_path}_split{i+1}'
-            utils.shell_do(plink_cmd)
-            # run hash on each chunk
-            hasher_split = MD5_plink.MD5_plink(f'{geno_path}_split{i+1}', allele_list=allele_list)
-            hashes_split = hasher_split.allele_string_gen()
-            # combine all hashes together again
-            split = pd.read_csv(f'{geno_path}_split{i+1}_MD5_hash.txt', sep='\s+', header=0, names=['IID', 'HASH'])
-            splits.append(split)
-            # TODO: handle missing snps files
-            # missing = pd.read_csv(f'{geno_path}_split{i+1}_traw_temp_missing_alleles.txt', sep='\s+')
-            # missings.append(missing)
+    # check validity of allele_list path
+    if not os.path.exists(allele_list):
+        raise FileNotFoundError(f'{allele_list} does not exist.')
 
-            # remove intermediate files (splits)
-            for fname in os.listdir(os.path.split(geno_path)[0]):
-                if fname.startswith(f'{geno_path}_split'):
-                    print(fname)
-                    os.remove(f'{geno_path}/{fname}')
-
-        hash_out = pd.concat(splits, axis=0)
-        # missing_out = pd.concat(missings, axis=0)
-
-    else:
-        hasher = MD5_plink.MD5_plink(f'{geno_path}', allele_list=allele_list)
-        hashes = hasher.allele_string_gen()
-        hash_out = pd.read_csv(f'{geno_path}_MD5_hash.txt', sep='\s+', header=0, names=['IID', 'HASH'])
-        # missing_out = pd.read_csv(f'{geno_path}_traw_temp_missing_alleles.txt', sep='\s+')
-
-    hash_out.to_csv(f'{out_path}_MD5_hashes.txt', sep='\t', header=False, index=False)
-    # missing_out.to_csv(f'{out_path}_missing_alleles.txt', sep='\t', header=False, index=False)
+    hasher = MD5_plink.MD5_plink(f'{geno_path}', f'{out_path}', allele_list=allele_list)
+    hasher.allele_string_gen()
+    hash_out = pd.read_csv(f'{out_path}_MD5_hash.txt', sep='\s+', header=None, names=['IID', 'HASH'])
 
     # get duplicates from hashes
     grouped_by_hash = hash_out.groupby('HASH').agg(lambda x:list(x)).reset_index()
@@ -103,7 +67,6 @@ def run_hashing(geno_path, out_path, allele_list='GP2_allcall_snps3.set'):
     hashed_dups = grouped_by_hash[grouped_by_hash['NUM_SAMPS'] > 1]
     hashed_dups_out = pd.Series(hashed_dups.IID.values,index=hashed_dups.HASH).to_dict()
 
-    # TODO: best way to output the duplicates? (currently printing dict to file)
     return (hashed_dups_out, f'{out_path}_MD5_hashes.txt')
 
 
@@ -125,7 +88,9 @@ def handle_main():
 
     # check if allele list should be created
     if args_dict['default_snps']:
-        allele_list = 'GP2_allcall_snps.set'
+        allele_list = 'GP2_allcall_snps4.set'
+    elif args_dict['snp_list']:
+        allele_list = args_dict['snp_list']
     else:
         allele_list = get_perfect_callrate_snps(geno_path, out_path)
 
@@ -136,6 +101,12 @@ def handle_main():
     print(f'duplicates contained in {out_path}_duplicates.txt')
     print(f'hashes are located in {hash_file}')
 
+    if os.path.getsize(f'{out_path}_missing_alleles.txt') > 0:
+        num_samps_with_missing = len(open(f'{out_path}_missing_alleles.txt', 'r').readlines())
+        print(f'WARNING: {num_samps_with_missing} sample(s) are missing calls from the allele list. this may result in mismatching hashes for duplicate samples.')
+        print(f'missing snps are located in {out_path}_missing_alleles.txt')
+    else:
+        print('no missing snp calls!')
 
 if __name__ == "__main__":
     handle_main()

@@ -31,6 +31,11 @@ Run from command line:
   - *Default*: `False`
   - *Description*: use default GP2 perfect callrate snps as allele list
 
+- **`--snp_list`**
+  - *Type*: `str`
+  - *Default*: `None`
+  - *Description*: path to allele list for hashing
+
 - **`--out`** *(required)*
   - *Type*: `str`
   - *Default*: `None`

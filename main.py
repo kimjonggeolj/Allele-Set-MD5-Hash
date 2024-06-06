@@ -41,7 +41,7 @@ def get_perfect_callrate_snps(geno_path, out_path):
     return f'{out_path}/allcall_snps.set'
 
 
-def run_hashing(geno_path, out_path, allele_list='GP2_allcall_snps3.set'):
+def run_hashing(geno_path, out_path, allele_list='GP2_allcall_snps.set'):
     # takes in geno_path
     # takes in out_path
     # returns tuple:
@@ -88,7 +88,7 @@ def handle_main():
 
     # check if allele list should be created
     if args_dict['default_snps']:
-        allele_list = 'GP2_allcall_snps4.set'
+        allele_list = 'GP2_allcall_snps.set'
     elif args_dict['snp_list']:
         allele_list = args_dict['snp_list']
     else:
@@ -98,7 +98,7 @@ def handle_main():
 
     json.dump(hash_to_ids, open(f'{out_path}_duplicates.json', 'w'))
 
-    print(f'duplicates contained in {out_path}_duplicates.txt')
+    print(f'duplicates contained in {out_path}_duplicates.json')
     print(f'hashes are located in {hash_file}')
 
     if os.path.getsize(f'{out_path}_missing_alleles.txt') > 0:

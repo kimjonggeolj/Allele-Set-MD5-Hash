@@ -84,7 +84,7 @@ class MD5_plink:
 
         with open(f'{out_path}_missing_alleles.txt', 'w') as f:
             for snp in all_missing_alleles:
-                f.write(f'{snp[0]}\t{snp[1]}\t{snp[2]}\n')
+                f.write(f'{snp[0]}\t{snp[1]}\n')
         f.close()
 
         return string_traws_out

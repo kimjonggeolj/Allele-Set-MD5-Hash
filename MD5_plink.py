@@ -51,7 +51,7 @@ class MD5_plink:
         traw = traw.drop_duplicates(subset=['CHR', 'POS'], keep=False)
 
         if traw.shape[0] != len(fingerprint_list):
-            traw = fingerprint_list.merge(traw.drop(columns='CHR'), how='outer', on='POS').fillna(-1)
+            traw = fingerprint_list.merge(traw, on=['POS','CHR'], how='outer').dropna()
 
         # tranpose df so its long, not wide
         traw = traw.set_index('SNP')
